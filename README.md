@@ -113,6 +113,17 @@ napredak na mapi). Desktop only (bez touch/mobile).
 
 ---
 
+## Vlastiti art (opciono) — `image-prompts.md`
+
+Igra koristi proceduralni canvas art (bića, ikone, karte) koji radi odmah. Ako želiš pravu
+generisanu grafiku, u root-u je **`image-prompts.md`** — ~150 gotovih promptova (200+ s
+pozama/fazama) za **ChatGPT / gpt-image-1 / DALL·E 3**, sinhronizovanih sa ID-evima sadržaja.
+
+Tok rada: generiši sliku → snimi je pod tačnim imenom (npr. `ugriz.png`) → ubaci u
+`public/assets/{sprites,cards,relics,potions,bg}/`. Loader (`src/assets/loader.ts`) je
+automatski prepozna i prikaže umjesto proceduralnog placeholder-a; fajlovi koji nedostaju
+ostaju proceduralni. **Igra radi i sa nula i sa svim slikama.**
+
 ## Krediti
 
 Dizajn, kod i umjetnost generisani proceduralno. Slavenska mitologija kao inspiracija:
