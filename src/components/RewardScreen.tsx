@@ -58,7 +58,7 @@ export default function RewardScreen() {
         {r && (
           <button className="reward-row panel" disabled={reward.relicTaken} onClick={takeRelic}>
             <span className="reward-icon-c">
-              <RelicBadge sprite={r.sprite} rarity={r.rarity} size={40} />
+              <RelicBadge id={r.id} sprite={r.sprite} rarity={r.rarity} size={40} />
             </span>
             <span className="reward-label">
               {r.name}
@@ -75,7 +75,7 @@ export default function RewardScreen() {
             onClick={takePotion}
           >
             <span className="reward-icon-c">
-              <PotionBadge color={p.color} size={36} />
+              <PotionBadge id={p.id} color={p.color} size={36} />
             </span>
             <span className="reward-label">
               {p.name}

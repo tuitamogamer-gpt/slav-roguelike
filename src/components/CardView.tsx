@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import type { CardDef, CardInstance, CardType } from '../game/types';
 import { getCard } from '../game/content/registry';
+import { useGameImage, cardRel } from '../assets/loader';
 
 const TYPE_LABEL: Record<CardType, string> = {
   napad: 'Napad',
@@ -16,9 +17,11 @@ function costDisplay(cost: number): string {
   return String(cost);
 }
 
-function CardArt({ type, cls }: { type: CardType; cls: string }) {
+function CardArt({ type, cls, id }: { type: CardType; cls: string; id: string }) {
+  const img = useGameImage(cardRel(id));
   const ref = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
+    if (img) return;
     const canvas = ref.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d')!;
@@ -102,7 +105,8 @@ function CardArt({ type, cls }: { type: CardType; cls: string }) {
     }
     ctx.restore();
     void cls;
-  }, [type, cls]);
+  }, [type, cls, img]);
+  if (img) return <img src={img.src} alt="" draggable={false} className="card-art-img" />;
   return <canvas ref={ref} className="card-art-canvas" />;
 }
 
@@ -155,7 +159,7 @@ export default function CardView({
           {def.name}
           {upgraded ? '+' : ''}
         </div>
-        <CardArt type={def.type} cls={def.cls} />
+        <CardArt type={def.type} cls={def.cls} id={id} />
         <div className="card-type-row">
           <span className={`card-rarity rar-${def.rarity}`} />
           <span className="card-type">{TYPE_LABEL[def.type]}</span>

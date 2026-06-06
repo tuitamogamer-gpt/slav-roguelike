@@ -57,7 +57,7 @@ export default function ShopView() {
                   disabled={r.sold || !can(r.price)}
                   onClick={() => buyRelic(r.id)}
                 >
-                  <RelicBadge sprite={def.sprite} rarity={def.rarity} size={40} />
+                  <RelicBadge id={def.id} sprite={def.sprite} rarity={def.rarity} size={40} />
                   <div className="shop-item-info">
                     <div className="shop-item-name">{def.name}</div>
                     <div className="shop-item-text">{def.text}</div>
@@ -80,7 +80,7 @@ export default function ShopView() {
                   disabled={p.sold || !can(p.price)}
                   onClick={() => buyPotion(p.id)}
                 >
-                  <PotionBadge color={def.color} size={34} />
+                  <PotionBadge id={def.id} color={def.color} size={34} />
                   <div className="shop-item-info">
                     <div className="shop-item-name">{def.name}</div>
                     <div className="shop-item-text">{def.text}</div>

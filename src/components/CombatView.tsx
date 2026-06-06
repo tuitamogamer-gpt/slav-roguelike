@@ -5,6 +5,7 @@ import { getCard, getPotion, getRelic } from '../game/content/registry';
 import { CreatureCanvas, PotionBadge, RelicBadge } from './shared';
 import CardView from './CardView';
 import ParticleCanvas, { type ParticleHandle, type BurstKind } from './ParticleCanvas';
+import { useGameImage, bgRel } from '../assets/loader';
 
 const STATUS_META: Record<Status, { label: string; cls: string; short: string }> = {
   vulnerable: { label: 'Ranjiv', cls: 's-vuln', short: 'RNJ' },
@@ -127,6 +128,7 @@ export default function CombatView() {
   const [shake, setShake] = useState<'' | 'shake-light' | 'shake-heavy'>('');
   const [flash, setFlash] = useState<Record<string, number>>({});
   const floatId = useRef(1);
+  const bgImg = useGameImage(run ? bgRel(run.map.world) : null);
 
   const centerOf = useCallback((target: 'player' | number): { x: number; y: number } => {
     const el = target === 'player' ? playerRef.current : enemyRefs.current[target];
@@ -263,14 +265,19 @@ export default function CombatView() {
         setPending(null);
       }}
     >
-      <div className={`combat-bg world-${combat.enemies[0]?.spriteKey ? 'jav' : 'jav'}`} />
+      <div
+        className="combat-bg"
+        style={bgImg ? { backgroundImage: `url(${bgImg.src})`, backgroundSize: 'cover', backgroundPosition: 'center' } : undefined}
+      />
 
       {/* top status line */}
       <div className="combat-top">
         <div className="combat-relics">
           {run.relics.slice(0, 8).map((rid) => {
             const r = getRelic(rid);
-            return r ? <RelicBadge key={rid} sprite={r.sprite} rarity={r.rarity} size={30} /> : null;
+            return r ? (
+              <RelicBadge key={rid} id={rid} sprite={r.sprite} rarity={r.rarity} size={30} />
+            ) : null;
           })}
         </div>
         <div className="combat-turn">
@@ -372,7 +379,7 @@ export default function CombatView() {
               {p ? (
                 <div className="potion-actions">
                   <button className="potion-btn" title={`${p.name}\n${p.text}`} onClick={() => onPotionClick(i)}>
-                    <PotionBadge color={p.color} size={38} />
+                    <PotionBadge id={pid!} color={p.color} size={38} />
                   </button>
                   <button className="potion-discard" title="Baci" onClick={() => discardPotion(i)}>
                     ×

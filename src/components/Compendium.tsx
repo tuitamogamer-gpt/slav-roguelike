@@ -52,7 +52,7 @@ export default function Compendium() {
           <div className="comp-relics">
             {allRelics().map((r) => (
               <div key={r.id} className="comp-relic panel">
-                <RelicBadge sprite={r.sprite} rarity={r.rarity} size={48} />
+                <RelicBadge id={r.id} sprite={r.sprite} rarity={r.rarity} size={48} />
                 <div className="comp-relic-info">
                   <div className="comp-relic-name">{r.name}</div>
                   <div className="comp-relic-text">{r.text}</div>

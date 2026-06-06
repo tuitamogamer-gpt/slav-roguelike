@@ -38,7 +38,7 @@ export default function TopBar({ showMenu = true }: { showMenu?: boolean }) {
               onMouseEnter={() => setRelicTip(rid)}
               onMouseLeave={() => setRelicTip(null)}
             >
-              <RelicBadge sprite={r.sprite} rarity={r.rarity} size={40} />
+              <RelicBadge id={rid} sprite={r.sprite} rarity={r.rarity} size={40} />
               {relicTip === rid && (
                 <div className="relic-tip panel">
                   <div className="relic-tip-name">{r.name}</div>
@@ -57,7 +57,7 @@ export default function TopBar({ showMenu = true }: { showMenu?: boolean }) {
             const p = pid ? getPotion(pid) : null;
             return (
               <div key={i} className="potion-slot" title={p?.name}>
-                {p ? <PotionBadge color={p.color} size={34} /> : <div className="potion-empty" />}
+                {p ? <PotionBadge id={pid!} color={p.color} size={34} /> : <div className="potion-empty" />}
               </div>
             );
           })}

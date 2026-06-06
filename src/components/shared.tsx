@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { drawCreature } from '../render/creatures';
 import { drawRelicIcon, drawPotion } from '../render/icons';
+import { useGameImage, spriteRel, relicRel, potionRel } from '../assets/loader';
 
 export function CreatureCanvas({
   ckey,
@@ -11,8 +12,10 @@ export function CreatureCanvas({
   size: number;
   animate?: boolean;
 }) {
+  const img = useGameImage(spriteRel(ckey));
   const ref = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
+    if (img) return; // real sprite present → skip procedural draw
     const canvas = ref.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d')!;
@@ -31,21 +34,37 @@ export function CreatureCanvas({
     };
     raf = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(raf);
-  }, [ckey, size, animate]);
+  }, [ckey, size, animate, img]);
+
+  if (img) {
+    return (
+      <img
+        src={img.src}
+        alt=""
+        draggable={false}
+        className={`sprite-img ${animate ? 'sprite-idle' : ''}`}
+        style={{ width: size, height: size, display: 'block', objectFit: 'contain' }}
+      />
+    );
+  }
   return <canvas ref={ref} style={{ width: size, height: size, display: 'block' }} />;
 }
 
 export function RelicBadge({
   sprite,
+  id,
   rarity,
   size = 44,
 }: {
   sprite: string;
+  id?: string;
   rarity?: string;
   size?: number;
 }) {
+  const img = useGameImage(id ? relicRel(id) : null);
   const ref = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
+    if (img) return;
     const canvas = ref.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d')!;
@@ -54,13 +73,32 @@ export function RelicBadge({
     canvas.height = size * dpr;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     drawRelicIcon(ctx, sprite, size, rarity);
-  }, [sprite, rarity, size]);
+  }, [sprite, rarity, size, img]);
+  if (img)
+    return (
+      <img
+        src={img.src}
+        alt=""
+        draggable={false}
+        style={{ width: size, height: size, borderRadius: '50%' }}
+      />
+    );
   return <canvas ref={ref} style={{ width: size, height: size }} />;
 }
 
-export function PotionBadge({ color, size = 40 }: { color: string; size?: number }) {
+export function PotionBadge({
+  color,
+  id,
+  size = 40,
+}: {
+  color: string;
+  id?: string;
+  size?: number;
+}) {
+  const img = useGameImage(id ? potionRel(id) : null);
   const ref = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
+    if (img) return;
     const canvas = ref.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d')!;
@@ -69,6 +107,8 @@ export function PotionBadge({ color, size = 40 }: { color: string; size?: number
     canvas.height = size * dpr;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     drawPotion(ctx, color, size);
-  }, [color, size]);
+  }, [color, size, img]);
+  if (img)
+    return <img src={img.src} alt="" draggable={false} style={{ width: size, height: size }} />;
   return <canvas ref={ref} style={{ width: size, height: size }} />;
 }
