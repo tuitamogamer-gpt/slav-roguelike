@@ -8,3 +8,5 @@ dist-ssr
 .idea
 *.log
 npm-debug.log*
+
+*.tsbuildinfo
