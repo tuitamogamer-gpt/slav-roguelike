@@ -10,3 +10,6 @@ dist-ssr
 npm-debug.log*
 
 *.tsbuildinfo
+
+# raw downloads staging (kopirano u public/assets)
+/assets/
