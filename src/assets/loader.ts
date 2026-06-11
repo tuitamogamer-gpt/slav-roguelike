@@ -26,11 +26,11 @@ export function assetUrl(rel: string): string {
   return `${BASE}assets/${rel}`.replace(/([^:])\/{2,}/g, '$1/');
 }
 
-export const spriteRel = (key: string) => `sprites/${key}.png`;
-export const cardRel = (id: string) => `cards/${id}.png`;
-export const relicRel = (id: string) => `relics/${id}.png`;
-export const potionRel = (id: string) => `potions/${id}.png`;
-export const bgRel = (world: string) => `bg/${world}.png`;
+export const spriteRel = (key: string) => `sprites/${key}.webp`;
+export const cardRel = (id: string) => `cards/${id}.webp`;
+export const relicRel = (id: string) => `relics/${id}.webp`;
+export const potionRel = (id: string) => `potions/${id}.webp`;
+export const bgRel = (world: string) => `bg/${world}.webp`;
 
 /**
  * Returns a loaded HTMLImageElement for the asset, or null if it does not

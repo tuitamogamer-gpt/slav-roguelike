@@ -13,3 +13,5 @@ npm-debug.log*
 
 # raw downloads staging (kopirano u public/assets)
 /assets/
+
+.vercel

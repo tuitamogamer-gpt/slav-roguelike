@@ -6,23 +6,24 @@ import { CreatureCanvas, PotionBadge, RelicBadge } from './shared';
 import CardView from './CardView';
 import ParticleCanvas, { type ParticleHandle, type BurstKind } from './ParticleCanvas';
 import { useGameImage, bgRel } from '../assets/loader';
+import { STATUS_INFO, keywordsForText } from '../game/content/statusInfo';
 
-const STATUS_META: Record<Status, { label: string; cls: string; short: string }> = {
-  vulnerable: { label: 'Ranjiv', cls: 's-vuln', short: 'RNJ' },
-  weak: { label: 'Nemoć', cls: 's-weak', short: 'NEM' },
-  frail: { label: 'Krhkost', cls: 's-frail', short: 'KRH' },
-  strength: { label: 'Snaga', cls: 's-str', short: 'SNG' },
-  dexterity: { label: 'Spretnost', cls: 's-dex', short: 'SPR' },
-  bjes: { label: 'Bijes', cls: 's-bjes', short: 'BJS' },
-  poison: { label: 'Otrov', cls: 's-poison', short: 'OTR' },
-  regen: { label: 'Obnova', cls: 's-regen', short: 'OBN' },
-  thorns: { label: 'Trnje', cls: 's-thorns', short: 'TRN' },
-  intangible: { label: 'Sjenovit', cls: 's-intan', short: 'SJN' },
-  metal: { label: 'Oklop', cls: 's-metal', short: 'OKL' },
-  ritual: { label: 'Obred', cls: 's-ritual', short: 'OBR' },
-  kletva: { label: 'Kletva', cls: 's-kletva', short: 'KLT' },
-  okovi: { label: 'Okovi', cls: 's-okovi', short: 'OKV' },
-  echo: { label: 'Odjek', cls: 's-echo', short: 'ODJ' },
+const STATUS_CLS: Record<Status, { cls: string; short: string }> = {
+  vulnerable: { cls: 's-vuln', short: 'RNJ' },
+  weak: { cls: 's-weak', short: 'NEM' },
+  frail: { cls: 's-frail', short: 'KRH' },
+  strength: { cls: 's-str', short: 'SNG' },
+  dexterity: { cls: 's-dex', short: 'SPR' },
+  bjes: { cls: 's-bjes', short: 'BJS' },
+  poison: { cls: 's-poison', short: 'OTR' },
+  regen: { cls: 's-regen', short: 'OBN' },
+  thorns: { cls: 's-thorns', short: 'TRN' },
+  intangible: { cls: 's-intan', short: 'SJN' },
+  metal: { cls: 's-metal', short: 'OKL' },
+  ritual: { cls: 's-ritual', short: 'OBR' },
+  kletva: { cls: 's-kletva', short: 'KLT' },
+  okovi: { cls: 's-okovi', short: 'OKV' },
+  echo: { cls: 's-echo', short: 'ODJ' },
 };
 
 function StatusPips({ c }: { c: Combatant }) {
@@ -31,11 +32,18 @@ function StatusPips({ c }: { c: Combatant }) {
   return (
     <div className="status-pips">
       {entries.map(([s, v]) => {
-        const m = STATUS_META[s];
+        const m = STATUS_CLS[s];
+        const info = STATUS_INFO[s];
         return (
-          <span key={s} className={`pip ${m.cls}`} title={`${m.label}: ${v}`}>
+          <span key={s} className={`pip ${m.cls}`}>
             <span className="pip-short">{m.short}</span>
             <span className="pip-val">{v}</span>
+            <span className="pip-tip">
+              <b>
+                {info.label} {v}
+              </b>
+              {info.desc}
+            </span>
           </span>
         );
       })}
@@ -67,8 +75,18 @@ function IntentBubble({ intent }: { intent: Intent | null }) {
     icon = 'z';
     cls = 'i-sleep';
   }
+  const tip =
+    intent.type === 'attack' || intent.type === 'attack-multi'
+      ? `Sprema napad: ${intent.value} štete${intent.hits && intent.hits > 1 ? ` × ${intent.hits}` : ''}`
+      : intent.type === 'block'
+        ? 'Sprema odbranu — dobiće štit'
+        : intent.type === 'buff'
+          ? `Jača se: ${intent.label ?? ''}`
+          : intent.type === 'debuff'
+            ? `Baca slabljenje na tebe: ${intent.label ?? ''}`
+            : 'Nepoznata namjera';
   return (
-    <div className={`intent ${cls}`} title={intent.label}>
+    <div className={`intent ${cls}`} title={tip}>
       <span className="intent-icon">{icon}</span>
       {(intent.type === 'attack' || intent.type === 'attack-multi') && (
         <span className="intent-val">
@@ -130,6 +148,7 @@ export default function CombatView() {
   const floatId = useRef(1);
   const bgImg = useGameImage(run ? bgRel(run.map.world) : null);
   const [introFor, setIntroFor] = useState<string | null>(null);
+  const [hoverUid, setHoverUid] = useState<string | null>(null);
 
   // dramatic intro overlay at the start of each combat
   useEffect(() => {
@@ -269,6 +288,15 @@ export default function CombatView() {
   const lowHp = combat.player.hp > 0 && combat.player.hp <= combat.player.maxHp * 0.3;
   const introDef = introFor ? getEnemy(combat.enemies[0].defId) : null;
 
+  const hoverCard = hoverUid ? combat.hand.find((c) => c.uid === hoverUid) : null;
+  const hoverHints = hoverCard
+    ? keywordsForText(
+        ((hoverCard.upgraded && getCard(hoverCard.id).upgradedText) || getCard(hoverCard.id).text) +
+          ' ' +
+          (getCard(hoverCard.id).keywords?.join(' ') ?? ''),
+      )
+    : [];
+
   return (
     <div
       ref={containerRef}
@@ -351,6 +379,8 @@ export default function CombatView() {
                 key={c.uid}
                 className="hand-card-wrap"
                 style={{ transform: `rotate(${rot}deg) translateY(${lift}px)` }}
+                onMouseEnter={() => setHoverUid(c.uid)}
+                onMouseLeave={() => setHoverUid((h) => (h === c.uid ? null : h))}
               >
                 <CardView
                   inst={c}
@@ -407,6 +437,17 @@ export default function CombatView() {
       </div>
 
       {targeting && <div className="targeting-hint">Izaberi metu (desni klik za otkaz)</div>}
+
+      {hoverHints.length > 0 && (
+        <div className="keyword-hints panel">
+          {hoverHints.map((h) => (
+            <div key={h.label} className="kw">
+              <b>{h.label}</b>
+              <span>{h.desc}</span>
+            </div>
+          ))}
+        </div>
+      )}
 
       {introDef && (
         <div className={`combat-intro ${combat.isBoss ? 'boss-intro' : ''}`}>

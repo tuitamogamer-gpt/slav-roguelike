@@ -876,6 +876,71 @@
 .pip-val {
   font-weight: 700;
 }
+.pip {
+  position: relative;
+  cursor: help;
+}
+.pip-tip {
+  display: none;
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: 230px;
+  padding: 8px 10px;
+  background: rgba(12, 10, 7, 0.97);
+  border: 1px solid var(--line-bright);
+  border-radius: var(--rad);
+  box-shadow: var(--shadow-deep);
+  font-family: var(--font-body);
+  font-size: 13px;
+  line-height: 1.35;
+  color: var(--ink);
+  text-align: left;
+  z-index: 70;
+  pointer-events: none;
+}
+.pip-tip b {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 13px;
+  letter-spacing: 0.05em;
+  color: var(--gold-bright);
+  margin-bottom: 3px;
+}
+.pip:hover .pip-tip {
+  display: block;
+}
+
+/* keyword hint panel (card hover) */
+.keyword-hints {
+  position: absolute;
+  left: 18px;
+  bottom: 290px;
+  width: 250px;
+  padding: 12px 14px;
+  z-index: 35;
+  pointer-events: none;
+  animation: fadeIn 0.18s ease;
+}
+.keyword-hints .kw {
+  margin-bottom: 9px;
+}
+.keyword-hints .kw:last-child {
+  margin-bottom: 0;
+}
+.keyword-hints b {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  color: var(--gold-bright);
+}
+.keyword-hints span {
+  font-size: 13px;
+  line-height: 1.35;
+  color: var(--ink-dim);
+}
 .s-vuln {
   color: var(--st-vuln);
 }
