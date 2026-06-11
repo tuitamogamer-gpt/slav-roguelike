@@ -33,6 +33,15 @@ import {
   type SettingsState,
 } from './save';
 import { sfx, setVolumes, startMusic } from '../audio/audio';
+import {
+  initCloud,
+  loginGoogle as cloudLogin,
+  logout as cloudLogout,
+  fetchCloud,
+  mergeMeta,
+  queueCloudSave,
+  type CloudUser,
+} from '../cloud/firebase';
 
 export type Screen =
   | 'menu'
@@ -78,6 +87,11 @@ interface GameStore {
   eventOutcome: EventOutcome | null;
   enemyActing: boolean;
   flashWorld: boolean;
+  user: CloudUser | null;
+  cloudStatus: 'off' | 'syncing' | 'ok' | 'error';
+
+  loginGoogle: () => Promise<void>;
+  logoutCloud: () => Promise<void>;
 
   // lifecycle
   bootstrap: () => void;
@@ -204,12 +218,56 @@ export const useGame = create<GameStore>((set, get) => ({
   eventOutcome: null,
   enemyActing: false,
   flashWorld: false,
+  user: null,
+  cloudStatus: 'off',
 
   bootstrap: () => {
     const meta = loadMeta();
     const settings = loadSettings();
     setVolumes(settings.music, settings.sfx, settings.muted);
     set({ meta, settings, run: loadRun() });
+
+    initCloud(
+      async (user) => {
+        set({ user, cloudStatus: user ? 'syncing' : 'off' });
+        if (!user) return;
+        try {
+          const cloud = await fetchCloud();
+          const st = get();
+          if (cloud?.meta) {
+            const merged = mergeMeta(st.meta, cloud.meta);
+            saveMeta(merged);
+            set({ meta: merged });
+          }
+          // a run saved in the cloud continues here if this device has none
+          if (cloud?.run && !st.run && st.screen === 'menu') {
+            saveRun(cloud.run);
+            set({ run: cloud.run });
+          }
+          // push current state up so the cloud is complete
+          queueCloudSave({ meta: get().meta, run: get().run });
+          set({ cloudStatus: 'ok' });
+        } catch {
+          set({ cloudStatus: 'error' });
+        }
+      },
+      (cloudStatus) => set({ cloudStatus }),
+    );
+  },
+
+  loginGoogle: async () => {
+    sfx('button');
+    try {
+      await cloudLogin();
+    } catch {
+      set({ cloudStatus: 'error' });
+    }
+  },
+
+  logoutCloud: async () => {
+    sfx('button');
+    await cloudLogout();
+    set({ user: null, cloudStatus: 'off' });
   },
 
   goMenu: () => {

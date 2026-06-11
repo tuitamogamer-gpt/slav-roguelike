@@ -1,4 +1,5 @@
 import type { MetaState, RunState } from '../types';
+import { queueCloudSave } from '../cloud/firebase';
 
 const META_KEY = 'triglav.meta.v1';
 const RUN_KEY = 'triglav.run.v1';
@@ -46,6 +47,7 @@ export function saveMeta(meta: MetaState) {
   } catch {
     // ignore
   }
+  queueCloudSave({ meta });
 }
 
 export function loadSettings(): SettingsState {
@@ -82,4 +84,5 @@ export function saveRun(run: RunState | null) {
   } catch {
     // ignore
   }
+  queueCloudSave({ run });
 }
