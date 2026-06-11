@@ -11,7 +11,7 @@ export default function RestView() {
   const [upgrading, setUpgrading] = useState(false);
   if (!run) return null;
 
-  const heal = Math.floor(run.maxHp * 0.3);
+  const heal = Math.floor(run.maxHp * 0.25);
   const upgradable = run.deck.filter((c) => !c.upgraded && getCard(c.id).type !== 'kletva' && getCard(c.id).type !== 'stanje');
 
   return (

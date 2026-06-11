@@ -171,7 +171,12 @@ function pickEncounter(run: RunState, kind: 'borba' | 'elita' | 'gazda'): {
   const rng = rngForFloor(run, kind);
   if (kind === 'gazda') return { enemies: pick(ACT1_ENCOUNTERS.boss, rng), isElite: false, isBoss: true };
   if (kind === 'elita') return { enemies: pick(ACT1_ENCOUNTERS.elite, rng), isElite: true, isBoss: false };
-  const pool = run.floorsCleared <= 1 ? ACT1_ENCOUNTERS.easy : ACT1_ENCOUNTERS.normal;
+  const pool =
+    run.floorsCleared <= 1
+      ? ACT1_ENCOUNTERS.easy
+      : run.floorsCleared >= 6
+        ? ACT1_ENCOUNTERS.hard
+        : ACT1_ENCOUNTERS.normal;
   return { enemies: pick(pool, rng), isElite: false, isBoss: false };
 }
 
@@ -392,7 +397,12 @@ export const useGame = create<GameStore>((set, get) => ({
       let source: RewardScreenState['source'] = 'normal';
       if (combat.isBoss) source = 'boss';
       else if (combat.isElite) source = 'elite';
-      const goldBase = combat.isBoss ? 95 + Math.floor(rng() * 15) : combat.isElite ? 30 + Math.floor(rng() * 15) : 12 + Math.floor(rng() * 12);
+      const extraEnemies = Math.max(0, combat.enemies.length - 1);
+      const goldBase = combat.isBoss
+        ? 95 + Math.floor(rng() * 15)
+        : combat.isElite
+          ? 30 + Math.floor(rng() * 15)
+          : 12 + Math.floor(rng() * 12) + extraEnemies * 5;
       const cardChoices = rollCardRewards(r2.cls, rng, source === 'boss' ? 'boss' : source === 'elite' ? 'elite' : 'normal');
       const relicId = combat.isBoss || combat.isElite ? rollRelic(r2, rng) : null;
       const potionId = !combat.isBoss && rng() < 0.4 ? rollPotion(rng) : null;
@@ -556,7 +566,7 @@ export const useGame = create<GameStore>((set, get) => ({
     const { run } = get();
     if (!run) return;
     const r2 = clone(run);
-    const heal = Math.floor(r2.maxHp * 0.3);
+    const heal = Math.floor(r2.maxHp * 0.25);
     r2.hp = Math.min(r2.maxHp, r2.hp + heal);
     sfx('heal');
     saveRun(r2);

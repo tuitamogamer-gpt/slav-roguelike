@@ -257,6 +257,39 @@ function drawOne(state: CombatState) {
   if (card) state.hand.push(card);
 }
 
+// ---------- difficulty scaling ----------
+// Enemies grow stronger the deeper you go: more HP, bonus Strength,
+// and from floor 4 a chance of an affix (named modifier with a status).
+const AFFIXES: { prefix: string; status: Status; amount: number }[] = [
+  { prefix: 'Bijesni', status: 'strength', amount: 2 },
+  { prefix: 'Okovani', status: 'metal', amount: 4 },
+  { prefix: 'Trnoviti', status: 'thorns', amount: 3 },
+  { prefix: 'Prokleti', status: 'ritual', amount: 1 },
+];
+
+function scaleEnemy(
+  e: EnemyState,
+  floors: number,
+  isElite: boolean,
+  isBoss: boolean,
+  rng: () => number,
+) {
+  // bosses scale at half rate — their base is already a wall
+  const hpMult = 1 + (isBoss ? 0.025 : 0.05) * floors;
+  e.maxHp = Math.round(e.maxHp * hpMult);
+  e.hp = e.maxHp;
+
+  const bonusStr = Math.floor(floors / 4) + (isElite ? 1 : 0);
+  if (bonusStr > 0) e.statuses.strength = (e.statuses.strength ?? 0) + bonusStr;
+
+  // affix roll — never on bosses (they have their own drama)
+  if (!isBoss && floors >= 4 && rng() < 0.35) {
+    const affix = AFFIXES[Math.floor(rng() * AFFIXES.length)];
+    e.name = `${affix.prefix} ${e.name.toLowerCase()}`;
+    e.statuses[affix.status] = (e.statuses[affix.status] ?? 0) + affix.amount;
+  }
+}
+
 // ---------- combat setup ----------
 export function buildCombat(
   run: RunState,
@@ -297,6 +330,7 @@ export function buildCombat(
       data: {},
     };
     if (def.onSpawn) def.onSpawn(e);
+    scaleEnemy(e, run.floorsCleared, !!opts.isElite, !!opts.isBoss, rng);
     return e;
   });
 

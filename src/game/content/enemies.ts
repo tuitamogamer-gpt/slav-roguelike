@@ -389,7 +389,7 @@ const babaroga: EnemyDef = {
   name: 'Babaroga',
   world: 'jav',
   isBoss: true,
-  hpRange: [150, 150],
+  hpRange: [165, 165],
   sprite: 'babaroga',
   scale: 1.5,
   flavor: 'Gasi vatru i svjetlost; u njenoj torbi nestaju neposlušni.',
@@ -471,7 +471,7 @@ export const ENEMIES: EnemyDef[] = [
   babaroga,
 ];
 
-// Encounter pools for act 1
+// Encounter pools for act 1 — `hard` se koristi u dubljim spratovima
 export const ACT1_ENCOUNTERS = {
   easy: [['vuk', 'vuk'], ['drekavac'], ['senka', 'senka'], ['bauk']],
   normal: [
@@ -481,6 +481,14 @@ export const ACT1_ENCOUNTERS = {
     ['grobna_vjestica', 'vuk'],
     ['bauk', 'bauk'],
     ['vodnjak', 'mora'],
+  ],
+  hard: [
+    ['vuk', 'vuk', 'vuk'],
+    ['drekavac', 'mora', 'senka'],
+    ['grobna_vjestica', 'karakondzula'],
+    ['bauk', 'bauk', 'senka'],
+    ['vodnjak', 'vodnjak'],
+    ['karakondzula', 'drekavac'],
   ],
   elite: [['vampir'], ['azdaja'], ['lesnik']],
   boss: [['babaroga']],

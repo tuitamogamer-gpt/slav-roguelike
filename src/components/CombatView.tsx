@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useGame } from '../game/store/gameStore';
 import type { CombatState, EnemyState, Status, Combatant, Intent } from '../game/types';
-import { getCard, getPotion, getRelic } from '../game/content/registry';
+import { getCard, getPotion, getRelic, getEnemy } from '../game/content/registry';
 import { CreatureCanvas, PotionBadge, RelicBadge } from './shared';
 import CardView from './CardView';
 import ParticleCanvas, { type ParticleHandle, type BurstKind } from './ParticleCanvas';
@@ -129,6 +129,17 @@ export default function CombatView() {
   const [flash, setFlash] = useState<Record<string, number>>({});
   const floatId = useRef(1);
   const bgImg = useGameImage(run ? bgRel(run.map.world) : null);
+  const [introFor, setIntroFor] = useState<string | null>(null);
+
+  // dramatic intro overlay at the start of each combat
+  useEffect(() => {
+    const enc = combat?.encounterId;
+    if (!enc || combat.turn > 1) return;
+    setIntroFor(enc);
+    const t = window.setTimeout(() => setIntroFor(null), combat.isBoss ? 3400 : 2400);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [combat?.encounterId]);
 
   const centerOf = useCallback((target: 'player' | number): { x: number; y: number } => {
     const el = target === 'player' ? playerRef.current : enemyRefs.current[target];
@@ -255,11 +266,13 @@ export default function CombatView() {
   };
 
   const targeting = pending !== null;
+  const lowHp = combat.player.hp > 0 && combat.player.hp <= combat.player.maxHp * 0.3;
+  const introDef = introFor ? getEnemy(combat.enemies[0].defId) : null;
 
   return (
     <div
       ref={containerRef}
-      className={`scene combat-scene vignette ${shake}`}
+      className={`scene combat-scene vignette ${shake} ${lowHp ? 'low-hp' : ''}`}
       onContextMenu={(e) => {
         e.preventDefault();
         setPending(null);
@@ -394,6 +407,14 @@ export default function CombatView() {
       </div>
 
       {targeting && <div className="targeting-hint">Izaberi metu (desni klik za otkaz)</div>}
+
+      {introDef && (
+        <div className={`combat-intro ${combat.isBoss ? 'boss-intro' : ''}`}>
+          {combat.isBoss && <div className="intro-kicker">GAZDA SLOJA</div>}
+          <div className="intro-name">{introDef.name}</div>
+          {introDef.flavor && <div className="intro-flavor">„{introDef.flavor}"</div>}
+        </div>
+      )}
 
       <ParticleCanvas ref={particleRef} />
       <div className="floats-layer">

@@ -152,6 +152,7 @@ export default function CardView({
         .filter(Boolean)
         .join(' ')}
       onClick={onClick}
+      title={def.flavor ? `„${def.flavor}"` : undefined}
     >
       <div className={`card-cost cost-${def.type}`}>{costDisplay(cost)}</div>
       <div className="card-inner">
