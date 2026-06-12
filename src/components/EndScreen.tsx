@@ -18,11 +18,8 @@ export default function EndScreen() {
             ? 'Babaroga je svladana. Jav je za sada miran — ali Nav čeka u dubini.'
             : 'Tama te je progutala. Tvoja priča postaje šapat uz vatru.'}
         </p>
-        {win && !meta.unlockedClasses.includes('vjestica') && (
-          <p className="end-unlock">Otključana nova klasa: Vještica</p>
-        )}
-        {win && meta.unlockedClasses.includes('vjestica') && (
-          <p className="end-unlock">Vještica je dostupna u novom pohodu.</p>
+        {win && (
+          <p className="end-unlock">Pokušaj sada drugom klasom — svaki pohod je druga priča.</p>
         )}
 
         <div className="end-stats">

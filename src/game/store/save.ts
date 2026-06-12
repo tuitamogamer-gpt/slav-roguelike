@@ -20,7 +20,7 @@ export const DEFAULT_SETTINGS: SettingsState = {
 };
 
 export const DEFAULT_META: MetaState = {
-  unlockedClasses: ['vukodlak'],
+  unlockedClasses: ['vukodlak', 'vjestica'],
   unlockedCards: [],
   unlockedRelics: [],
   highestAct: 0,
@@ -35,7 +35,12 @@ export function loadMeta(): MetaState {
   try {
     const raw = localStorage.getItem(META_KEY);
     if (!raw) return { ...DEFAULT_META };
-    return { ...DEFAULT_META, ...JSON.parse(raw) };
+    const meta: MetaState = { ...DEFAULT_META, ...JSON.parse(raw) };
+    // migracija: obje klase su otključane od starta (stari save-ovi imaju samo vukodlaka)
+    for (const cls of DEFAULT_META.unlockedClasses) {
+      if (!meta.unlockedClasses.includes(cls)) meta.unlockedClasses.push(cls);
+    }
+    return meta;
   } catch {
     return { ...DEFAULT_META };
   }

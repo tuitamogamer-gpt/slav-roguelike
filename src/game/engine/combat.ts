@@ -279,11 +279,11 @@ function scaleEnemy(
   e.maxHp = Math.round(e.maxHp * hpMult);
   e.hp = e.maxHp;
 
-  const bonusStr = Math.floor(floors / 4) + (isElite ? 1 : 0);
+  const bonusStr = Math.floor(floors / 5) + (isElite ? 1 : 0);
   if (bonusStr > 0) e.statuses.strength = (e.statuses.strength ?? 0) + bonusStr;
 
   // affix roll — never on bosses (they have their own drama)
-  if (!isBoss && floors >= 4 && rng() < 0.35) {
+  if (!isBoss && floors >= 5 && rng() < 0.3) {
     const affix = AFFIXES[Math.floor(rng() * AFFIXES.length)];
     e.name = `${affix.prefix} ${e.name.toLowerCase()}`;
     e.statuses[affix.status] = (e.statuses[affix.status] ?? 0) + affix.amount;
