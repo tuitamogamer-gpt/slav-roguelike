@@ -96,7 +96,20 @@ export async function fetchCloud(): Promise<CloudData | null> {
   if (!s) return null;
   const { doc, getDoc } = await import('firebase/firestore');
   const snap = await getDoc(doc(s.db, 'users', currentUser.uid));
-  return snap.exists() ? (snap.data() as CloudData) : null;
+  if (!snap.exists()) return null;
+  const data = snap.data() as { meta?: MetaState; run?: unknown };
+  // run je spremljen kao JSON string (Firestore ne podržava ugniježdene nizove)
+  let run: RunState | null = null;
+  if (typeof data.run === 'string') {
+    try {
+      run = JSON.parse(data.run) as RunState;
+    } catch {
+      run = null;
+    }
+  } else if (data.run && typeof data.run === 'object') {
+    run = data.run as RunState; // stariji format (bez mape ne bi prošao, ali za svaki slučaj)
+  }
+  return { meta: data.meta, run };
 }
 
 // ---- debounced save ----
@@ -130,7 +143,9 @@ export async function flushCloudSave() {
       updatedAt: serverTimestamp(),
     };
     if (data.meta !== undefined) payload.meta = JSON.parse(JSON.stringify(data.meta));
-    if (data.run !== undefined) payload.run = data.run ? JSON.parse(JSON.stringify(data.run)) : null;
+    // run kao JSON string — RunState sadrži ugniježdene nizove (map.columns)
+    // koje Firestore ne prihvata kao polja
+    if (data.run !== undefined) payload.run = data.run ? JSON.stringify(data.run) : null;
     await setDoc(doc(s.db, 'users', currentUser.uid), payload, { merge: true });
     statusCb('ok');
   } catch {
